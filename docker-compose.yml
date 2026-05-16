@@ -1,5 +1,4 @@
 version: "3.8"
-
 services:
   api:
     build:
@@ -19,19 +18,33 @@ services:
     depends_on:
       mongodb:
         condition: service_started
-    # Override CMD for development (hot-reload)
-    # Comment this line and use the Dockerfile CMD for production
+      redis:
+        condition: service_healthy
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-
   mongodb:
     image: mongo:6.0
     ports:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
-
+  redis:
+    image: redis:7-alpine
+    container_name: rag_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
 volumes:
   mongodb_data:
     driver: local
   chroma_data:
+    driver: local
+  redis_data:
     driver: local
