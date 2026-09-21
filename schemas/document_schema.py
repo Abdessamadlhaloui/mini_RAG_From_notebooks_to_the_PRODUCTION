@@ -1,6 +1,26 @@
-from pydantic import BaseModel, Field
+from datetime import datetime
+from typing import Optional
+
+from pydantic import BaseModel
+
+
 class IngestResponse(BaseModel):
-    status: str = Field(..., description="Ingestion result: 'success' or 'error'")
-    message: str = Field(..., description='Human-readable status message')
-    filename: str = Field(..., description='Name of the ingested file')
-    chunks_processed: int = Field(..., description='Number of text chunks indexed')
+    document_id: str
+    filename: str
+    status: str
+    message: str
+    chunks_processed: int = 0
+    embedding_version: Optional[str] = None
+
+
+class DocumentStatusResponse(BaseModel):
+    document_id: str
+    filename: str
+    status: str
+    chunks_processed: int
+    error: Optional[str] = None
+    page_count: Optional[int] = None
+    has_ocr: bool = False
+    tables_count: int = 0
+    images_count: int = 0
+    timestamp: datetime
